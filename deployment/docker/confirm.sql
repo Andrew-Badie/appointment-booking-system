@@ -24,28 +24,27 @@ CREATE DATABASE /*!32312 IF NOT EXISTS*/ `confirm_LBS` /*!40100 DEFAULT CHARACTE
 USE `confirm_LBS`;
 
 --
--- Table structure for table `Appointment_Book`
+-- Table structure for table `APPOINTMENT_Book`
 --
 
-DROP TABLE IF EXISTS `Appointment_Book`;
+DROP TABLE IF EXISTS `APPOINTMENT_Book`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `Appointment_Book` (
+CREATE TABLE `APPOINTMENT_Book` (
   `username` varchar(30) DEFAULT NULL,
   `code` varchar(25) NOT NULL,
   `date1` date NOT NULL,
-  PRIMARY KEY (`code`,`date1`),
-  UNIQUE KEY `username` (`username`)
+  PRIMARY KEY (`code`,`date1`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `Appointment_Book`
+-- Dumping data for table `APPOINTMENT_Book`
 --
 
-LOCK TABLES `Appointment_Book` WRITE;
-/*!40000 ALTER TABLE `Appointment_Book` DISABLE KEYS */;
-/*!40000 ALTER TABLE `Appointment_Book` ENABLE KEYS */;
+LOCK TABLES `APPOINTMENT_Book` WRITE;
+/*!40000 ALTER TABLE `APPOINTMENT_Book` DISABLE KEYS */;
+/*!40000 ALTER TABLE `APPOINTMENT_Book` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --

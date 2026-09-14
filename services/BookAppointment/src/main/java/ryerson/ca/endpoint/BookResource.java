@@ -87,20 +87,25 @@ public class BookResource {
         Business book = new Business();
         boolean bs;
         try {
+            if (code == null || !code.matches("[A-Za-z0-9_-]{1,20}") ||
+                    userid == null || !userid.matches("[A-Za-z0-9_-]{1,30}")) {
+                throw new javax.ws.rs.WebApplicationException(400);
+            }
             bs = book.book(code, userid);
+            if (!bs) throw new javax.ws.rs.WebApplicationException(409);
             return ("Inserted");
         } catch (ClassNotFoundException ex) {
             Logger.getLogger(BookResource.class.getName()).log(Level.SEVERE, null, ex);
-            return (ex.getMessage());
+            throw new javax.ws.rs.WebApplicationException(ex, 503);
         } catch (SQLException ex) {
             Logger.getLogger(BookResource.class.getName()).log(Level.SEVERE, null, ex);
-               return (ex.getMessage());
+               throw new javax.ws.rs.WebApplicationException(ex, 503);
         } catch (ServerAddressNotSuppliedException ex) {
             Logger.getLogger(BookResource.class.getName()).log(Level.SEVERE, null, ex);
-               return (ex.getMessage());
+               throw new javax.ws.rs.WebApplicationException(ex, 503);
         } catch (IOException ex) {
             Logger.getLogger(BookResource.class.getName()).log(Level.SEVERE, null, ex);
-               return (ex.getMessage());
+               throw new javax.ws.rs.WebApplicationException(ex, 503);
         }
         
 

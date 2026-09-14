@@ -105,13 +105,52 @@ public class FrontEnd extends HttpServlet {
                 boolean isAuthenticated = Business.isAuthenticated(username, password);
                 if(isAuthenticated){
                     request.setAttribute("username", username);
-                    token = autho.createJWT("FrontEnd", username, 100000);
+                    token = autho.createJWT("FrontEnd", username, 1800000);
                     
                     Cookie newCookie = new Cookie(authenticationCookieName,token);
+                    newCookie.setHttpOnly(true);
+                    newCookie.setPath(request.getContextPath());
                     response.addCookie(newCookie);
                     RequestDispatcher requestDispatcher = request.getRequestDispatcher("login.jsp");
                     
                     requestDispatcher.forward(request, response);
+                } else {
+                    Cookie expired = new Cookie(authenticationCookieName, "");
+                    expired.setPath(request.getContextPath());
+                    expired.setMaxAge(0);
+                    response.addCookie(expired);
+                    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                    request.getRequestDispatcher("login-error.html").forward(request, response);
+                }
+                break;
+            case "book":
+                if (token.isEmpty()) {
+                    response.sendError(401, "Please log in before booking.");
+                    break;
+                }
+                String code = request.getParameter("code");
+                if (code == null || !code.matches("[A-Za-z0-9_-]{1,20}")) {
+                    response.sendError(400, "Invalid appointment code.");
+                    break;
+                }
+                javax.ws.rs.client.Client client = javax.ws.rs.client.ClientBuilder.newClient();
+                try {
+                    javax.ws.rs.core.Form form = new javax.ws.rs.core.Form()
+                            .param("code", code).param("userid", uname);
+                    javax.ws.rs.core.Response backend = client.target(
+                            "http://" + System.getenv("bookService") + "/BookAppointment/webresources/book/update")
+                            .request().post(javax.ws.rs.client.Entity.form(form));
+                    try {
+                        if (backend.getStatus() != 200) {
+                            response.sendError(backend.getStatus(), "Booking could not be completed.");
+                            break;
+                        }
+                    } finally {
+                        backend.close();
+                    }
+                    response.sendRedirect(request.getContextPath() + "/FrontEnd?pageName=search&query=Psychology");
+                } finally {
+                    client.close();
                 }
                 break;
             case "search":

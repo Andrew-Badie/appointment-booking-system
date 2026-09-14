@@ -1,0 +1,123 @@
+name: coe692-local
+x-app: &app
+  restart: unless-stopped
+  logging:
+    driver: json-file
+    options:
+      max-size: "5m"
+      max-file: "2"
+x-db: &db
+  <<: *app
+  image: mysql:8.0.32
+  environment:
+    MYSQL_ROOT_PASSWORD: student
+  command: ["--innodb-buffer-pool-size=64M", "--max-connections=40"]
+  healthcheck:
+    test: ["CMD-SHELL", "MYSQL_PWD=$$MYSQL_ROOT_PASSWORD mysql --protocol=TCP -h 127.0.0.1 -uroot -e 'SELECT 1' >/dev/null"]
+    interval: 5s
+    timeout: 5s
+    retries: 40
+    start_period: 30s
+services:
+  searchdb:
+    <<: *db
+    volumes:
+      - search-data:/var/lib/mysql
+      - ./deployment/docker/search.sql:/docker-entrypoint-initdb.d/01-seed.sql:ro
+  bookdb:
+    <<: *db
+    volumes:
+      - book-data:/var/lib/mysql
+      - ./deployment/docker/book.sql:/docker-entrypoint-initdb.d/01-seed.sql:ro
+  confirmdb:
+    <<: *db
+    volumes:
+      - confirm-data:/var/lib/mysql
+      - ./deployment/docker/confirm.sql:/docker-entrypoint-initdb.d/01-seed.sql:ro
+  kubemq:
+    <<: *app
+    image: kubemq/kubemq-community@sha256:56620f6da891f01d58b176ccc0be954bbdeb3d6d3296026ba219e2a58c75cb51
+    volumes:
+      - message-data:/store
+  searchappointment:
+    <<: *app
+    build:
+      context: .
+      target: search
+    environment:
+      DB_URL: searchdb:3306
+    depends_on:
+      searchdb:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "--silent", "http://localhost:8080/SearchAppointments/"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 30s
+  confirmappointment:
+    <<: *app
+    build:
+      context: .
+      target: confirm
+    environment:
+      DB_URL: confirmdb:3306
+      kubeMQAddress: kubemq:50000
+    depends_on:
+      confirmdb:
+        condition: service_healthy
+      kubemq:
+        condition: service_started
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "--silent", "http://localhost:8080/ConfirmAppointment/"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 30s
+  bookappointment:
+    <<: *app
+    build:
+      context: .
+      target: book
+    environment:
+      DB_URL: bookdb:3306
+      kubeMQAddress: kubemq:50000
+    depends_on:
+      bookdb:
+        condition: service_healthy
+      kubemq:
+        condition: service_started
+      confirmappointment:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "--silent", "http://localhost:8080/BookAppointment/"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 30s
+  frontend:
+    <<: *app
+    build:
+      context: .
+      target: frontend
+    environment:
+      searchService: searchappointment:8080
+      bookService: bookappointment:8080
+    ports:
+      - "127.0.0.1:${APP_PORT:-8080}:8080"
+    depends_on:
+      searchappointment:
+        condition: service_healthy
+      bookappointment:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "--silent", "http://localhost:8080/FrontEnd/"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 30s
+volumes:
+  search-data:
+  book-data:
+  confirm-data:
+  message-data:

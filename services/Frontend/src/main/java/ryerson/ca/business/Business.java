@@ -26,7 +26,7 @@ import ryerson.ca.helper.AppointmentsXML;
  */
 public class Business {
     public static boolean isAuthenticated(String username, String password){
-        if (username.equals("AndrewBadie") && password.equals("1234")) {
+        if ("AndrewBadie".equals(username) && "1234".equals(password)) {
             return true;
         }
         return false;
