@@ -1,0 +1,23 @@
+target/
+build/
+dist/
+*.class
+*.war
+*.ear
+*.log
+*.bak
+nbproject/private/
+.env
+.env.*
+!.env.example
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Local shortcuts and cloud credentials
+*.lnk
+.kube/
+.gcloud/
+credentials.json
+application_default_credentials.json

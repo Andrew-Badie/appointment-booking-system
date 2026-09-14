@@ -1,0 +1,295 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: confirmdb-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 256Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: confirmdb
+spec:
+  selector:
+    app: confirmdb
+  ports:
+    - port: 3306
+      targetPort: 3306
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: confirmdb
+spec:
+  selector:
+    matchLabels:
+      app: confirmdb
+  template:
+    metadata:
+      labels:
+        app: confirmdb
+    spec:
+      containers:
+        - name: confirmdb
+          image: andrewbadie/coe692:confirmdb
+          ports:
+            - containerPort: 3306
+          volumeMounts:
+            - name: storage
+              mountPath: /data/confirmdb
+      volumes:
+        - name: storage
+          persistentVolumeClaim:
+            claimName: confirmdb-pvc
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: confirmappointment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: confirmappointment
+  template:
+    metadata:
+      labels:
+        app: confirmappointment
+    spec:
+      containers:
+        - name: confirmappointment
+          image: andrewbadie/coe692:confirmWebApp
+          ports:
+            - containerPort: 8080
+          env:
+            - name: DB_URL
+              value: confirmdb:3306
+            - name: kubeMQAddress
+              value: 34.118.239.161:50000
+          imagePullPolicy: Always
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: bookdb-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 256Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: bookdb
+spec:
+  selector:
+    app: bookdb
+  ports:
+    - port: 3306
+      targetPort: 3306
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bookdb
+spec:
+  selector:
+    matchLabels:
+      app: bookdb
+  template:
+    metadata:
+      labels:
+        app: bookdb
+    spec:
+      containers:
+        - name: bookdb
+          image: andrewbadie/coe692:bookdb
+          ports:
+            - containerPort: 3306
+          volumeMounts:
+            - name: storage
+              mountPath: /data/bookdb
+      volumes:
+        - name: storage
+          persistentVolumeClaim:
+            claimName: bookdb-pvc
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bookappointment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: bookappointment
+  template:
+    metadata:
+      labels:
+        app: bookappointment
+    spec:
+      containers:
+        - name: bookappointment
+          image: andrewbadie/coe692:bookWebApp
+          ports:
+            - containerPort: 8080
+          env:
+            - name: DB_URL
+              value: bookdb:3306
+            - name: kubeMQAddress
+              value: 34.118.239.161:50000
+          imagePullPolicy: Always
+---
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: searchdb-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 256Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: searchdb
+spec:
+  selector:
+    app: searchdb
+  ports:
+    - port: 3306
+      targetPort: 3306
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: searchdb
+spec:
+  selector:
+    matchLabels:
+      app: searchdb
+  template:
+    metadata:
+      labels:
+        app: searchdb
+    spec:
+      containers:
+        - name: searchdb
+          image: andrewbadie/coe692:searchdb
+          ports:
+            - containerPort: 3306
+          volumeMounts:
+            - name: storage
+              mountPath: /data/searchdb
+      volumes:
+        - name: storage
+          persistentVolumeClaim:
+            claimName: searchdb-pvc
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: searchappointment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: searchappointment
+  template:
+    metadata:
+      labels:
+        app: searchappointment
+    spec:
+      containers:
+        - name: searchappointment
+          image: andrewbadie/coe692:searchWebApp
+          ports:
+            - containerPort: 8080
+          env:
+            - name: DB_URL
+              value: searchdb:3306
+            - name: kubeMQAddress
+              value: 34.118.239.161:50000
+          imagePullPolicy: Always
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: frontend
+  template:
+    metadata:
+      labels:
+        app: frontend
+    spec:
+      containers:
+        - name: frontend
+          image: andrewbadie/coe692:frontendWebApp
+          ports:
+            - containerPort: 8080
+          env:
+            - name: searchService
+              value: searchappointment:80
+
+            - name: bookService
+              value: bookappointment:80
+          imagePullPolicy: Always
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: confirmappointment
+spec:
+  selector:
+    app: confirmappointment
+  ports:
+    - port: 80
+      targetPort: 8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: bookappointment
+spec:
+  selector:
+    app: bookappointment
+  ports:
+    - port: 80
+      targetPort: 8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: searchappointment
+spec:
+  selector:
+    app: searchappointment
+  ports:
+    - port: 80
+      targetPort: 8080
+  type: LoadBalancer
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend
+spec:
+  selector:
+    app: frontend
+  ports:
+    - port: 80
+      targetPort: 8080
+  type: LoadBalancer
