@@ -137,13 +137,16 @@ public class FrontEnd extends HttpServlet {
                 try {
                     javax.ws.rs.core.Form form = new javax.ws.rs.core.Form()
                             .param("code", code).param("userid", uname);
-                    try (javax.ws.rs.core.Response backend = client.target(
+                    javax.ws.rs.core.Response backend = client.target(
                             "http://" + System.getenv("bookService") + "/BookAppointment/webresources/book/update")
-                            .request().post(javax.ws.rs.client.Entity.form(form))) {
+                            .request().post(javax.ws.rs.client.Entity.form(form));
+                    try {
                         if (backend.getStatus() != 200) {
                             response.sendError(backend.getStatus(), "Booking could not be completed.");
                             break;
                         }
+                    } finally {
+                        backend.close();
                     }
                     response.sendRedirect(request.getContextPath() + "/FrontEnd?pageName=search&query=Psychology");
                 } finally {

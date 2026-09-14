@@ -140,7 +140,6 @@ tr:nth-child(even) {
                                   <button type="submit" name="code" value="<%=appointment.getId()%>">Book</button>
                                 </form>
                                 <% } else { %>Booked<% } %></td>
-                            <% } else {System.out.println("Currently Not Avialable");}%></td>
                             <% }
 }
                         

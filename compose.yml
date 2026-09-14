@@ -36,7 +36,7 @@ services:
       - ./deployment/docker/confirm.sql:/docker-entrypoint-initdb.d/01-seed.sql:ro
   kubemq:
     <<: *app
-    image: kubemq/kubemq-community:latest
+    image: kubemq/kubemq-community@sha256:56620f6da891f01d58b176ccc0be954bbdeb3d6d3296026ba219e2a58c75cb51
     volumes:
       - message-data:/store
   searchappointment:

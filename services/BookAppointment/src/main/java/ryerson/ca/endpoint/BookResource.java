@@ -96,16 +96,16 @@ public class BookResource {
             return ("Inserted");
         } catch (ClassNotFoundException ex) {
             Logger.getLogger(BookResource.class.getName()).log(Level.SEVERE, null, ex);
-            return (ex.getMessage());
+            throw new javax.ws.rs.WebApplicationException(ex, 503);
         } catch (SQLException ex) {
             Logger.getLogger(BookResource.class.getName()).log(Level.SEVERE, null, ex);
-               return (ex.getMessage());
+               throw new javax.ws.rs.WebApplicationException(ex, 503);
         } catch (ServerAddressNotSuppliedException ex) {
             Logger.getLogger(BookResource.class.getName()).log(Level.SEVERE, null, ex);
-               return (ex.getMessage());
+               throw new javax.ws.rs.WebApplicationException(ex, 503);
         } catch (IOException ex) {
             Logger.getLogger(BookResource.class.getName()).log(Level.SEVERE, null, ex);
-               return (ex.getMessage());
+               throw new javax.ws.rs.WebApplicationException(ex, 503);
         }
         
 
