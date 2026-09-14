@@ -64,8 +64,9 @@ The original Kubernetes YAML uses service port 80 for the application services, 
 
 ## Known limitations and next edits
 
-- **Login currently accepts any credentials.** `services/Frontend/src/main/java/ryerson/ca/business/Business.java` has `isAuthenticated(...)` returning `true`. This is intentionally preserved for a separate manual edit. JWT creation and verification do not implement password validation.
-- The frontend login controller also needs an explicit failed-login response when credential validation is added. Some HTML forms use different field names; align those with the controller.
+- **Login now checks a single hardcoded demo account.** `services/Frontend/src/main/java/ryerson/ca/business/Business.java` accepts the case-sensitive username `AndrewBadie` and password `1234`. For non-null inputs, other combinations return `false`; the previous unconditional `true` has been removed. This is a classroom demo check, not a user-account system or production authentication.
+- The credential check calls `.equals(...)` on request inputs, so missing parameters can cause a `NullPointerException`. Use null-safe comparisons or validate inputs first. The frontend login controller still needs an explicit failed-login response; it currently does not forward or display an error when validation returns `false`. Some HTML forms use different field names; align those with the controller's `username` and `password` parameters.
+- The login change has been reviewed in source only. Rebuild and redeploy the frontend, then verify valid, invalid, empty, and missing credentials before claiming the deployed login flow works.
 - Database code and Dockerfiles retain the original `root` / `student` classroom credentials. Use only disposable local demo databases; externalize credentials before broader deployment.
 - The JWT key is generated at runtime, tokens are short-lived, and token values are logged. Remove token logging and review session handling before real use.
 - SQL is assembled using string concatenation in several places; use parameterized queries and explicit error handling.
@@ -78,4 +79,4 @@ The original Kubernetes YAML uses service port 80 for the application services, 
 
 Imported from Andrew Badie's original VM export on 2026-09-14. The source, SQL, Dockerfiles, Kubernetes YAML, and shared NetBeans configuration are retained. The working booking `web.xml` correction to `ryerson.ca.endpoint.ApplicationConfig` was already included in the export.
 
-The migration adds this README and ignore rules. It does not implement the planned login change or claim a newly tested build. Compiled artifacts, personal cloud configuration, and the Windows shortcut are excluded. Editing GitHub files alone does not update existing containers; rebuild and redeploy the affected application.
+The migration added this README and ignore rules. Andrew subsequently replaced the unconditional authentication result with a single demo-account credential check; this README reflects that source change. A fresh build and the updated deployed login flow have not yet been verified. Compiled artifacts, personal cloud configuration, and the Windows shortcut are excluded. Editing GitHub files alone does not update existing containers; rebuild and redeploy the affected application.
