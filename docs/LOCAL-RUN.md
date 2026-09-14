@@ -57,3 +57,7 @@ docker compose logs --tail 100 frontend searchappointment bookappointment confir
 - The database write and message publication are not one transaction. A broker outage can leave a booking without confirmation; an outbox/retry design remains future work.
 - The confirmation database is updated asynchronously. The frontend displays booking status, not a separate confirmation screen.
 - SQL/resource-handling improvements and broader failure/restart coverage remain work beyond this demo.
+
+## Verified revision
+
+[The integration run](https://github.com/Andrew-Badie/appointment-booking-system/actions/runs/34874717740) passed all listed checks on Ubuntu with fresh images and volumes. Windows instructions have not been executed on the user's laptop. This confirms the demo path, not production reliability or recovery from every service outage.

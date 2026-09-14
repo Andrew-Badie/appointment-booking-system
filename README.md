@@ -2,7 +2,7 @@
 
 COE692 course project recovered from the original NetBeans/Linux VM. The system separates appointment search, booking, and confirmation into Java web applications, with a servlet/JSP frontend, MySQL databases, Docker images, and a Kubernetes deployment.
 
-**Status: recovered course/demo source.** Search was exercised locally using the original Docker images during recovery. Booking-status search worked after correcting the booking servlet configuration. All four services compiled and packaged successfully in [GitHub Actions](https://github.com/Andrew-Badie/appointment-booking-system/actions/runs/34873318370) using Java 11 and Maven 3.9.16. The complete booking-to-confirmation flow has not yet been verified. This is not production-ready authentication or deployment.
+**Status: recovered course/demo source.** Search was exercised locally using the original Docker images during recovery. Booking-status search worked after correcting the booking servlet configuration. All four services compiled and packaged successfully in [GitHub Actions](https://github.com/Andrew-Badie/appointment-booking-system/actions/runs/34873318370) using Java 11 and Maven 3.9.16. The local booking-to-confirmation path is now verified by the [Compose integration run](https://github.com/Andrew-Badie/appointment-booking-system/actions/runs/34874717740), including login, search, booking, messaging, duplicate rejection and database restart persistence. This is not production-ready authentication or deployment.
 
 ## Run the application
 
@@ -31,7 +31,7 @@ Each application has its own Maven POM and inherits shared Java 11 build setting
 
 The frontend calls the search API. For logged-in searches it also calls the booking API to determine whether each result is already booked. Search, booking, and confirmation have separate databases: `LBS`, `book_LBS`, and `confirm_LBS`.
 
-After inserting a booking, the booking service publishes a `BOOK:<code>:<username>:<date>` message on `book_appointment_channel`. The confirmation service subscribes to stored events and copies booking information into its database. The source includes this messaging implementation; local recovery has not yet validated it end to end.
+After inserting a booking, the booking service publishes a `BOOK:<code>:<username>:<date>` message on `book_appointment_channel`. The confirmation service subscribes to stored events and copies booking information into its database. The Compose integration check validates a booking event reaching the confirmation database. Broker outage recovery and transactional delivery remain unverified.
 
 Historical runtime: Tomcat 8.5 with JDK 11, MySQL 8.0.32, and Google Kubernetes Engine. The old Dockerfiles use `tomcat:8.5-jdk11-openjdk` and `mysql:8.0.32`. These are preserved historical dependencies, not recommendations for a new public deployment.
 
@@ -86,10 +86,12 @@ The original Kubernetes YAML uses service port 80 for the application services, 
 - New booking database volumes use a string `userid` and a unique appointment code. Existing databases require migration; changing seed SQL does not alter initialized volumes.
 - Confirmation endpoints contain hardcoded/demo values and need end-to-end validation with KubeMQ.
 - The frontend's booking-status HTTP call can propagate backend failures as HTTP 500.
-- Runtime dependency upgrades and automated end-to-end checks remain follow-up work.
+- Runtime dependency upgrades and broader failure-path/restart tests remain follow-up work; the local happy-path integration check is included.
 
 ## Recovery provenance
 
 Imported from Andrew Badie's original VM export on 2026-09-14. The source, SQL, Dockerfiles, Kubernetes YAML, and shared NetBeans configuration are retained. The working booking `web.xml` correction to `ryerson.ca.endpoint.ApplicationConfig` was already included in the export.
 
-The migration added this README and ignore rules. Andrew subsequently replaced the unconditional authentication result with a single demo-account credential check; this README reflects that source change. The Maven build has since been verified in GitHub Actions; the updated deployed login flow has not yet been verified. Compiled artifacts, personal cloud configuration, and the Windows shortcut are excluded. Editing GitHub files alone does not update existing containers; rebuild and redeploy the affected application.
+The migration added this README and ignore rules. Andrew subsequently replaced the unconditional authentication result with a single demo-account credential check; this README reflects that source change. The Maven build has since been verified in GitHub Actions; login has also been exercised in the local Compose integration workflow. Compiled artifacts, personal cloud configuration, and the Windows shortcut are excluded. Editing GitHub files alone does not update existing containers; rebuild and redeploy the affected application.
+
+Subsequent recovery work adds the source-built Compose environment, integration checks, login/form corrections, frontend booking handler, and database insert/schema fixes. These are documented follow-up improvements to the recovered course implementation, not claims that the original submission contained this tooling.
