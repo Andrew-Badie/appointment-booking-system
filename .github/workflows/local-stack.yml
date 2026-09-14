@@ -23,7 +23,7 @@ jobs:
         run: |
           docker compose ps --all
           docker compose logs --no-color --tail 100
-          docker image inspect kubemq/kubemq-community:latest --format '{{json .RepoDigests}}'
+          docker compose images
       - name: Clean up disposable CI stack
         if: always()
         run: docker compose down --volumes

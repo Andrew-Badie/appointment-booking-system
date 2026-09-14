@@ -53,7 +53,7 @@ docker compose logs --tail 100 frontend searchappointment bookappointment confir
 
 - Only the frontend is published, on the host loopback interface. Backends and databases use the internal Compose network.
 - Demo credentials are public and fixed. Backend APIs trust the internal caller; this is not production authorization.
-- The Community broker and MySQL version match the legacy application's recovery needs. The broker tag is currently `latest`; record the tested image digest before using this beyond local evaluation.
+- The Community broker and MySQL version match the legacy application's recovery needs. The Community broker is pinned to its downloaded image digest. Maven and MySQL use version tags; the Tomcat 9 / Java 11 tag can receive updates.
 - The database write and message publication are not one transaction. A broker outage can leave a booking without confirmation; an outbox/retry design remains future work.
 - The confirmation database is updated asynchronously. The frontend displays booking status, not a separate confirmation screen.
 - SQL/resource-handling improvements and broader failure/restart coverage remain work beyond this demo.
