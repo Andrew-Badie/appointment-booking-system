@@ -6,6 +6,8 @@ COE692 course project recovered from the original NetBeans/Linux VM. The system 
 
 ## Run the application
 
+**Browser-only option:** [Open in GitHub Codespaces](https://codespaces.new/Andrew-Badie/appointment-booking-system), then follow [the Codespaces guide](docs/CODESPACES.md). No local Docker Desktop or VM is required.
+
 See [the local setup guide](docs/LOCAL-RUN.md) for Windows/Docker Desktop and Linux steps. From the repository root with Docker running:
 
 ```bash
