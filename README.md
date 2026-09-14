@@ -52,7 +52,7 @@ The root POM builds all four services. It pins the compiler and WAR plugins, tar
 
 Open this repository's **Actions** tab and select **Build Java services**. Pushes to main, build branches, and pull requests trigger the workflow. Once the workflow is on the default branch, you can also select **Run workflow**. Open the run to inspect compilation results. Successful runs provide an **appointment-war-files** artifact containing all four WARs.
 
-The workflow checks compilation and WAR packaging. It does not start Tomcat, MySQL, or KubeMQ, and does not validate login, JSP rendering, or the booking-to-confirmation flow. The recovered project does not yet contain automated application tests. Consult the actual Actions run before describing a revision as build-verified.
+The workflow checks compilation and WAR packaging. It does not start Tomcat, MySQL, or KubeMQ, and does not validate login, JSP rendering, or the booking-to-confirmation flow. A separate Compose integration workflow tests login, search, booking, messaging, duplicate rejection, and persistence. Unit-test and broader failure-path coverage remain limited. Consult the actual Actions run before describing a revision as build-verified.
 
 After successful builds, the original application Dockerfiles expect these WAR files in the Docker build context:
 
@@ -84,9 +84,9 @@ The original Kubernetes YAML uses service port 80 for the application services, 
 - Demo credential comparisons are null-safe. Login forms send the expected fields, invalid login returns HTTP 401 with an error page, and the session cookie is HttpOnly. The demo session lasts 30 minutes; restarting the frontend invalidates its runtime signing key.
 - Database code and Dockerfiles retain the original `root` / `student` classroom credentials. Use only disposable local demo databases; externalize credentials before broader deployment.
 - The JWT key is generated at runtime. Token values are no longer printed by the JWT helper; session and authorization design still need review before real use.
-- SQL is assembled using string concatenation in several places; use parameterized queries and explicit error handling.
+- Search uses a parameterized query and closes JDBC resources. Other database paths still require a SQL and error-handling review.
 - New booking database volumes use a string `userid` and a unique appointment code. Existing databases require migration; changing seed SQL does not alter initialized volumes.
-- Confirmation endpoints contain hardcoded/demo values and need end-to-end validation with KubeMQ.
+- The booking-to-confirmation event path has an automated integration check. Other confirmation endpoints retain demo values and have not been validated end to end.
 - The frontend's booking-status HTTP call can propagate backend failures as HTTP 500.
 - Runtime dependency upgrades and broader failure-path/restart tests remain follow-up work; the local happy-path integration check is included.
 
@@ -97,3 +97,8 @@ Imported from Andrew Badie's original VM export on 2026-09-14. The source, SQL, 
 The migration added this README and ignore rules. Andrew subsequently replaced the unconditional authentication result with a single demo-account credential check; this README reflects that source change. The Maven build has since been verified in GitHub Actions; login has also been exercised in the local Compose integration workflow. Compiled artifacts, personal cloud configuration, and the Windows shortcut are excluded. Editing GitHub files alone does not update existing containers; rebuild and redeploy the affected application.
 
 Subsequent recovery work adds the source-built Compose environment, integration checks, login/form corrections, frontend booking handler, and database insert/schema fixes. These are documented follow-up improvements to the recovered course implementation, not claims that the original submission contained this tooling.
+
+
+### AI-assisted follow-up work
+
+The original Java coursework, Dockerfiles, and Kubernetes configuration predate the recovery work. Later build/Compose tooling, integration checks, UI revisions, and functional recovery fixes were developed with AI assistance. The commit and PR history records these changes; they should not be presented as features of the original submission. September 2026 review fixes also parameterize search and strengthen result assertions. CI establishes only the behaviours exercised by its checks, not production readiness.

@@ -1,6 +1,7 @@
 """Integration check for a NEW disposable Compose stack; creates a demo booking."""
 import http.cookiejar
 import os
+import re
 import subprocess
 import time
 import urllib.error
@@ -25,7 +26,13 @@ def check(condition, message):
     print("PASS: " + message, flush=True)
 
 status, body = post(dict(pageName="search", query="Psychology"))
-check(status == 200 and "Psychology" in body and "1234" in body, "anonymous search renders database result")
+results = re.findall(r'<article class="result">(.*?)</article>', body, re.DOTALL)
+check(status == 200 and any(re.search(r'APPOINTMENT\s*·\s*1234\s*<', result)
+      and re.search(r'<h3>\s*Psychology\s*</h3>', result) for result in results),
+      "anonymous search renders the Psychology appointment card")
+status, body = post(dict(pageName="search", query="' OR 1=1 -- "))
+check(status == 200 and '<article class="result">' not in body,
+      "SQL-looking search input is treated as text")
 for fields in [dict(username="wrong", password="wrong"), dict(username="AndrewBadie"),
                dict(username="", password=""), dict(username="AndrewBadie", password="wrong")]:
     status, body = post(dict(pageName="login", **fields))
@@ -65,3 +72,4 @@ for attempt in range(30):
 else:
     raise AssertionError("Booking did not survive database restart")
 check(True, "booking survives database restart")
+
