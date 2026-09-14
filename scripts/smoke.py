@@ -25,12 +25,18 @@ def check(condition, message):
         raise AssertionError(message)
     print("PASS: " + message, flush=True)
 
+def search_backend(encoded_query):
+    return subprocess.check_output(
+        ["docker", "compose", "exec", "-T", "searchappointment", "curl", "-fsS",
+         "http://127.0.0.1:8080/SearchAppointments/webresources/search/" + encoded_query],
+        text=True, timeout=30)
+
 status, body = post(dict(pageName="search", query="Psychology"))
 check(status == 200 and re.search(r'<td>\s*1234\s*</td>\s*<td>\s*Psychology\s*</td>', body),
       "anonymous search renders the Psychology appointment row")
-status, body = post(dict(pageName="search", query="' OR 1=1 -- "))
-check(status == 200 and not re.search(r'<td>\s*1234\s*</td>\s*<td>\s*Psychology\s*</td>', body),
-      "SQL-looking search input is treated as text")
+backend_body = search_backend("%27%20OR%201%3D1%20--%20")
+check("Psychology" not in backend_body and "<appointments" in backend_body,
+      "SQL-looking search input is treated as text by the search service")
 for fields in [dict(username="wrong", password="wrong"), dict(username="AndrewBadie"),
                dict(username="", password=""), dict(username="AndrewBadie", password="wrong")]:
     status, body = post(dict(pageName="login", **fields))
