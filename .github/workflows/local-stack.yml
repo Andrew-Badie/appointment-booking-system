@@ -18,6 +18,16 @@ jobs:
         run: docker compose up --build --detach --wait --wait-timeout 240
       - name: Exercise login, search, booking, messaging and persistence
         run: python3 scripts/smoke.py
+      - name: Capture desktop and mobile UI previews
+        run: |
+          python3 -m pip install playwright==1.51.0
+          python3 -m playwright install --with-deps chromium
+          python3 scripts/ui-preview.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ui-previews
+          path: ui-previews/
+          retention-days: 7
       - name: Container status and logs
         if: always()
         run: |
