@@ -31,7 +31,7 @@ for fields in [dict(username="wrong", password="wrong"), dict(username="AndrewBa
     status, body = post(dict(pageName="login", **fields))
     check(status == 401 and "Login unsuccessful" in body, "invalid or missing credentials are rejected")
 status, body = post(dict(pageName="login", username="AndrewBadie", password="1234"))
-check(status == 200 and "Greetings AndrewBadie" in body, "demo login renders JSP")
+check(status == 200 and "Signed in as AndrewBadie" in body, "demo login renders JSP")
 status, body = post(dict(pageName="search", query="Psychology"))
 check(status == 200 and 'value="1234"' in body, "authenticated search offers booking")
 status, body = post(dict(pageName="book", code="1234"))
