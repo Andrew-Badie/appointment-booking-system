@@ -2,7 +2,7 @@
 
 COE692 course project recovered from the original NetBeans/Linux VM. The system separates appointment search, booking, and confirmation into Java web applications, with a servlet/JSP frontend, MySQL databases, Docker images, and a Kubernetes deployment.
 
-**Status: recovered course/demo source.** Search was exercised locally using the original Docker images during recovery. Booking-status search worked after correcting the booking servlet configuration. A clean build of this exported source and the complete booking-to-confirmation flow have not yet been verified. This is not production-ready authentication or deployment.
+**Status: recovered course/demo source.** Search was exercised locally using the original Docker images during recovery. Booking-status search worked after correcting the booking servlet configuration. All four services compiled and packaged successfully in [GitHub Actions](https://github.com/Andrew-Badie/appointment-booking-system/actions/runs/34873318370) using Java 11 and Maven 3.9.16. The complete booking-to-confirmation flow has not yet been verified. This is not production-ready authentication or deployment.
 
 ## Repository contents
 
@@ -77,10 +77,10 @@ The original Kubernetes YAML uses service port 80 for the application services, 
 - The booking seed schema defines `userid` as an integer, while Java booking code supplies a username string. Reconcile that contract before claiming successful booking.
 - Confirmation endpoints contain hardcoded/demo values and need end-to-end validation with KubeMQ.
 - The frontend's booking-status HTTP call can propagate backend failures as HTTP 500.
-- Dependency upgrades, fresh-build verification, and automated end-to-end checks remain follow-up work.
+- Runtime dependency upgrades and automated end-to-end checks remain follow-up work.
 
 ## Recovery provenance
 
 Imported from Andrew Badie's original VM export on 2026-09-14. The source, SQL, Dockerfiles, Kubernetes YAML, and shared NetBeans configuration are retained. The working booking `web.xml` correction to `ryerson.ca.endpoint.ApplicationConfig` was already included in the export.
 
-The migration added this README and ignore rules. Andrew subsequently replaced the unconditional authentication result with a single demo-account credential check; this README reflects that source change. A fresh build and the updated deployed login flow have not yet been verified. Compiled artifacts, personal cloud configuration, and the Windows shortcut are excluded. Editing GitHub files alone does not update existing containers; rebuild and redeploy the affected application.
+The migration added this README and ignore rules. Andrew subsequently replaced the unconditional authentication result with a single demo-account credential check; this README reflects that source change. The Maven build has since been verified in GitHub Actions; the updated deployed login flow has not yet been verified. Compiled artifacts, personal cloud configuration, and the Windows shortcut are excluded. Editing GitHub files alone does not update existing containers; rebuild and redeploy the affected application.
