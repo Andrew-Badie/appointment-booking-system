@@ -11,6 +11,7 @@ with sync_playwright() as p:
     page.goto("http://localhost:8080/FrontEnd/", wait_until="networkidle")
     for label, width, height in [("desktop", 1440, 1050), ("mobile", 390, 844)]:
         page.set_viewport_size({"width": width, "height": height})
+        assert page.evaluate("document.documentElement.scrollWidth") <= width, "Page overflows " + label + " viewport"
         data = page.screenshot(path=str(out / (label + ".jpg")), full_page=True, type="jpeg", quality=75)
         print("UI_PREVIEW_" + label.upper() + ":" + base64.b64encode(data).decode(), flush=True)
     page.set_viewport_size({"width": 1440, "height": 1050})
