@@ -2,7 +2,7 @@
 
 COE692 course project recovered from the original NetBeans/Linux VM. The system separates appointment search, booking, and confirmation into Java web applications, with a servlet/JSP frontend, MySQL databases, Docker images, and a Kubernetes deployment.
 
-**Status: recovered course/demo source.** Search was exercised locally using the original Docker images during recovery. Booking-status search worked after correcting the booking servlet configuration. A clean build of this exported source and the complete booking-to-confirmation flow have not yet been verified. This is not production-ready authentication or deployment.
+**Status: recovered course/demo source.** Search was exercised locally using the original Docker images during recovery. Booking-status search worked after correcting the booking servlet configuration. All four services compiled and packaged successfully in [GitHub Actions](https://github.com/Andrew-Badie/appointment-booking-system/actions/runs/34873318370) using Java 11 and Maven 3.9.16. The complete booking-to-confirmation flow has not yet been verified. This is not production-ready authentication or deployment.
 
 ## Repository contents
 
@@ -15,7 +15,7 @@ COE692 course project recovered from the original NetBeans/Linux VM. The system 
 | `deployment/docker/` | Seven original Dockerfiles and three database seed scripts |
 | `deployment/kubernetes/lab5deployment.yaml` | Original deployments, services, and volume claims |
 
-Each application has its own Maven POM. There is no root Maven aggregator. Folder names and capitalization are retained from the VM.
+Each application has its own Maven POM and inherits shared Java 11 build settings from the root Maven parent/aggregator. Folder names and capitalization are retained from the VM.
 
 ## Architecture
 
@@ -27,16 +27,20 @@ Historical runtime: Tomcat 8.5 with JDK 11, MySQL 8.0.32, and Google Kubernetes 
 
 ## Build and deployment notes
 
-NetBeans is not required to edit the source. Maven build entry points, from the repository root, are:
+NetBeans and the original VM are not required to compile this project. Use JDK 11 and Maven 3.9.x. From the repository root:
 
 ```bash
-mvn -f services/Frontend/pom.xml clean package
-mvn -f services/SearchAppointments/pom.xml clean package
-mvn -f services/BookAppointment/pom.xml clean package
-mvn -f services/ConfirmAppointment/pom.xml clean package
+mvn --version
+mvn --batch-mode --no-transfer-progress clean verify
 ```
 
-These are build entry points, not a verified fresh-build recipe. The recovered POMs still contain Java 7 source/target settings, the legacy endorsed-directory configuration, and Maven WAR Plugin 2.3. Modernizing and testing those settings is pending. SearchAppointments/pom.xml also has a leading blank line before its XML declaration that should be removed before building.
+The root POM builds all four services. It pins the compiler and WAR plugins, targets Java 11 using `maven.compiler.release`, and removes the obsolete endorsed-directory setup. Individual builds still work, for example `mvn -f services/Frontend/pom.xml clean verify`. The existing Java EE/Jersey application dependencies are retained; this is not a migration to Jakarta EE.
+
+### Build from a browser
+
+Open this repository's **Actions** tab and select **Build Java services**. Pushes to main, build branches, and pull requests trigger the workflow. Once the workflow is on the default branch, you can also select **Run workflow**. Open the run to inspect compilation results. Successful runs provide an **appointment-war-files** artifact containing all four WARs.
+
+The workflow checks compilation and WAR packaging. It does not start Tomcat, MySQL, or KubeMQ, and does not validate login, JSP rendering, or the booking-to-confirmation flow. The recovered project does not yet contain automated application tests. Consult the actual Actions run before describing a revision as build-verified.
 
 After successful builds, the original application Dockerfiles expect these WAR files in the Docker build context:
 
@@ -73,10 +77,10 @@ The original Kubernetes YAML uses service port 80 for the application services, 
 - The booking seed schema defines `userid` as an integer, while Java booking code supplies a username string. Reconcile that contract before claiming successful booking.
 - Confirmation endpoints contain hardcoded/demo values and need end-to-end validation with KubeMQ.
 - The frontend's booking-status HTTP call can propagate backend failures as HTTP 500.
-- Dependency upgrades, fresh-build verification, and automated end-to-end checks remain follow-up work.
+- Runtime dependency upgrades and automated end-to-end checks remain follow-up work.
 
 ## Recovery provenance
 
 Imported from Andrew Badie's original VM export on 2026-09-14. The source, SQL, Dockerfiles, Kubernetes YAML, and shared NetBeans configuration are retained. The working booking `web.xml` correction to `ryerson.ca.endpoint.ApplicationConfig` was already included in the export.
 
-The migration added this README and ignore rules. Andrew subsequently replaced the unconditional authentication result with a single demo-account credential check; this README reflects that source change. A fresh build and the updated deployed login flow have not yet been verified. Compiled artifacts, personal cloud configuration, and the Windows shortcut are excluded. Editing GitHub files alone does not update existing containers; rebuild and redeploy the affected application.
+The migration added this README and ignore rules. Andrew subsequently replaced the unconditional authentication result with a single demo-account credential check; this README reflects that source change. The Maven build has since been verified in GitHub Actions; the updated deployed login flow has not yet been verified. Compiled artifacts, personal cloud configuration, and the Windows shortcut are excluded. Editing GitHub files alone does not update existing containers; rebuild and redeploy the affected application.
