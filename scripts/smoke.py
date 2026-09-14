@@ -26,19 +26,17 @@ def check(condition, message):
     print("PASS: " + message, flush=True)
 
 status, body = post(dict(pageName="search", query="Psychology"))
-results = re.findall(r'<article class="result">(.*?)</article>', body, re.DOTALL)
-check(status == 200 and any(re.search(r'APPOINTMENT\s*·\s*1234\s*<', result)
-      and re.search(r'<h3>\s*Psychology\s*</h3>', result) for result in results),
-      "anonymous search renders the Psychology appointment card")
+check(status == 200 and re.search(r'<td>\s*1234\s*</td>\s*<td>\s*Psychology\s*</td>', body),
+      "anonymous search renders the Psychology appointment row")
 status, body = post(dict(pageName="search", query="' OR 1=1 -- "))
-check(status == 200 and '<article class="result">' not in body,
+check(status == 200 and not re.search(r'<td>\s*1234\s*</td>\s*<td>\s*Psychology\s*</td>', body),
       "SQL-looking search input is treated as text")
 for fields in [dict(username="wrong", password="wrong"), dict(username="AndrewBadie"),
                dict(username="", password=""), dict(username="AndrewBadie", password="wrong")]:
     status, body = post(dict(pageName="login", **fields))
     check(status == 401 and "Login unsuccessful" in body, "invalid or missing credentials are rejected")
 status, body = post(dict(pageName="login", username="AndrewBadie", password="1234"))
-check(status == 200 and "Signed in as AndrewBadie" in body, "demo login renders JSP")
+check(status == 200 and "Greetings AndrewBadie" in body, "demo login renders JSP")
 status, body = post(dict(pageName="search", query="Psychology"))
 check(status == 200 and 'value="1234"' in body, "authenticated search offers booking")
 status, body = post(dict(pageName="book", code="1234"))
@@ -72,4 +70,3 @@ for attempt in range(30):
 else:
     raise AssertionError("Booking did not survive database restart")
 check(True, "booking survives database restart")
-
