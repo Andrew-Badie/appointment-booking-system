@@ -62,7 +62,7 @@ public class Messaging {
                     e.printStackTrace();
                 } catch (SQLException ex) {
                     Logger.getLogger(MyAppServletContextListener.class.getName()).log(Level.SEVERE, 
-                            null, ex);
+                            "Failed to store booking event", ex);
                 }  
             }
             @Override

@@ -21,22 +21,13 @@ import Helper.AppointmentConfirm;
  * @author student
  */
 public class APPOINTMENT_Booking_CRUD {
-    public static Connection getCon() throws ClassNotFoundException, SQLException{
-       Connection con=null;
-     try{
-         Class.forName("com.mysql.jdbc.Driver");
-        String connection=System.getenv("DB_URL");
-        //String connection ="localhost:3306";
-         con=DriverManager.getConnection("jdbc:mysql://"+connection+"/confirm_LBS?allowPublicKeyRetrieval=true&useSSL=false", "root", "student" );
-        
-         
-         System.out.println("Connection established.");
-     }
-     catch(Exception e){ System.out.println(e);}
-     return con;
-     
+    public static Connection getCon() throws ClassNotFoundException, SQLException {
+        Class.forName("com.mysql.cj.jdbc.Driver");
+        String connection = System.getenv("DB_URL");
+        return DriverManager.getConnection("jdbc:mysql://" + connection +
+                "/confirm_LBS?allowPublicKeyRetrieval=true&useSSL=false", "root", "student");
     }
-    
+
     public static boolean isOnBook(String code){
        boolean result;
         try{
@@ -115,27 +106,15 @@ public class APPOINTMENT_Booking_CRUD {
         
     }
     
-    public static void addBook(String code, String username, String date) throws ClassNotFoundException, SQLException{
-      
-        
-            Connection con= getCon();
-          
-            String q = "insert into APPOINTMENT_Book "
-                    + "(code, username, date1) values "
-                    + "("+
-                    "'" +code+"'"+ ","
-                    +"'"+username+"'" + ","
-                    +"'"+date+"'"
-                    +"');";
-            Statement stmt = con.createStatement(); 
-           
-            stmt.execute(q);
-			con.close();
-                        
-
-		 
- 
-        
+    public static void addBook(String code, String username, String date) throws ClassNotFoundException, SQLException {
+        // Stored events can be replayed after subscriber restart.
+        String sql = "INSERT INTO APPOINTMENT_Book (code, username, date1) VALUES (?, ?, ?) "
+                + "ON DUPLICATE KEY UPDATE username = VALUES(username)";
+        try (Connection con = getCon(); PreparedStatement statement = con.prepareStatement(sql)) {
+            statement.setString(1, code);
+            statement.setString(2, username);
+            statement.setDate(3, java.sql.Date.valueOf(date));
+            statement.executeUpdate();
+        }
     }
-    
 }
