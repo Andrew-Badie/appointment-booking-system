@@ -36,29 +36,22 @@ public class Appointment_CRUD {
     }
     public static Set<Appointment> searchForAppointments(String query){
         Set<Appointment> appointments = new HashSet<>();
-        try{
-            Connection con = getCon();
-            //NATURAL JOIN APPOINTMENT_SERVICE " + "NATURAL JOIN SERVICE
-            String q = "select * from APPOINTMENT  WHERE serviceName LIKE '%"+query+"%';";
-            System.out.println(q);
-                            PreparedStatement ps = con.prepareStatement(q);
-                            ResultSet rs = ps.executeQuery();
-                            while(rs.next()){
-                               // been = new UserInfo();
-                                String id = rs.getString("id");
-                                String serviceName = rs.getString("serviceName");
-                               // String firstName = rs.getString("firstname");
-                                //String lastName = rs.getString("lastname");
-                                
-                                //Service service = new Service(firstName, lastName);
-                                Appointment appointment = new Appointment(id, serviceName);
-                                appointments.add(appointment);
-                            }
-                            con.close();
-                    
-                    }catch(Exception e){
-                        System.out.println(e);
+        String sql = "SELECT * FROM APPOINTMENT WHERE serviceName LIKE ?";
+        try (Connection con = getCon()) {
+            if (con == null) {
+                throw new IllegalStateException("Search database is unavailable");
+            }
+            try (PreparedStatement ps = con.prepareStatement(sql)) {
+                ps.setString(1, "%" + query + "%");
+                try (ResultSet rs = ps.executeQuery()) {
+                    while (rs.next()) {
+                        appointments.add(new Appointment(rs.getString("id"), rs.getString("serviceName")));
                     }
+                }
+            }
+        } catch (java.sql.SQLException e) {
+            throw new IllegalStateException("Unable to search appointments", e);
+        }
         System.out.println(">>>>>>>>>>>"+appointments.size());
         return appointments;
     }
@@ -70,3 +63,4 @@ public class Appointment_CRUD {
     
     
 }
+
