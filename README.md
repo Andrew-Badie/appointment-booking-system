@@ -15,7 +15,7 @@ COE692 course project recovered from the original NetBeans/Linux VM. The system 
 | `deployment/docker/` | Seven original Dockerfiles and three database seed scripts |
 | `deployment/kubernetes/lab5deployment.yaml` | Original deployments, services, and volume claims |
 
-Each application has its own Maven POM. There is no root Maven aggregator. Folder names and capitalization are retained from the VM.
+Each application has its own Maven POM and inherits shared Java 11 build settings from the root Maven parent/aggregator. Folder names and capitalization are retained from the VM.
 
 ## Architecture
 
@@ -27,16 +27,20 @@ Historical runtime: Tomcat 8.5 with JDK 11, MySQL 8.0.32, and Google Kubernetes 
 
 ## Build and deployment notes
 
-NetBeans is not required to edit the source. Maven build entry points, from the repository root, are:
+NetBeans and the original VM are not required to compile this project. Use JDK 11 and Maven 3.9.x. From the repository root:
 
 ```bash
-mvn -f services/Frontend/pom.xml clean package
-mvn -f services/SearchAppointments/pom.xml clean package
-mvn -f services/BookAppointment/pom.xml clean package
-mvn -f services/ConfirmAppointment/pom.xml clean package
+mvn --version
+mvn --batch-mode --no-transfer-progress clean verify
 ```
 
-These are build entry points, not a verified fresh-build recipe. The recovered POMs still contain Java 7 source/target settings, the legacy endorsed-directory configuration, and Maven WAR Plugin 2.3. Modernizing and testing those settings is pending. SearchAppointments/pom.xml also has a leading blank line before its XML declaration that should be removed before building.
+The root POM builds all four services. It pins the compiler and WAR plugins, targets Java 11 using `maven.compiler.release`, and removes the obsolete endorsed-directory setup. Individual builds still work, for example `mvn -f services/Frontend/pom.xml clean verify`. The existing Java EE/Jersey application dependencies are retained; this is not a migration to Jakarta EE.
+
+### Build from a browser
+
+Open this repository's **Actions** tab and select **Build Java services**. Pushes to main, build branches, and pull requests trigger the workflow. Once the workflow is on the default branch, you can also select **Run workflow**. Open the run to inspect compilation results. Successful runs provide an **appointment-war-files** artifact containing all four WARs.
+
+The workflow checks compilation and WAR packaging. It does not start Tomcat, MySQL, or KubeMQ, and does not validate login, JSP rendering, or the booking-to-confirmation flow. The recovered project does not yet contain automated application tests. Consult the actual Actions run before describing a revision as build-verified.
 
 After successful builds, the original application Dockerfiles expect these WAR files in the Docker build context:
 
