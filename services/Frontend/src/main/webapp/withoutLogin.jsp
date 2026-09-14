@@ -113,7 +113,7 @@ tr:nth-child(even) {
             <form action="FrontEnd" method="post">
                 <input type="hidden" name ="pageName" value="login"/>
                 <input type="text"placeholder="Username" name="username">
-                <input type="password" placeholder="Password"name="psw">
+                <input type="password" placeholder="Password"name="password">
                 <button type="submit">Login</button>
             </form>
         </div>

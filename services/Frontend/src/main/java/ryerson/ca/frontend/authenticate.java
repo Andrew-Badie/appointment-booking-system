@@ -44,15 +44,12 @@ public class authenticate {
         }
 
         String jwt = builder.compact();
-        System.out.println(jwt);
         return jwt;
     }
 
     public Entry<Boolean, String> verify(String jwt) throws UnsupportedEncodingException {
         Jws<Claims> jws = null;
         String username = "";
-
-        System.out.println("Verifying JWT: " + jwt);
         try {
             jws = Jwts.parserBuilder()
                     .setSigningKey(secretKey) // Uses the correct key

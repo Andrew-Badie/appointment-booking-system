@@ -33,9 +33,10 @@ DROP TABLE IF EXISTS `APPOINTMENT_Book`;
 CREATE TABLE `APPOINTMENT_Book` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `code` varchar(20) DEFAULT NULL,
-  `userid` int(11) DEFAULT NULL,
+  `userid` varchar(30) DEFAULT NULL,
   `date1` date DEFAULT NULL,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `booking_code` (`code`)
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 

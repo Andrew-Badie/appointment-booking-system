@@ -1,0 +1,7 @@
+.git
+**/target
+**/nbproject/private
+.env
+.env.*
+!.env.example
+*.log

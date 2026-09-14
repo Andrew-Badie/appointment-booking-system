@@ -110,7 +110,7 @@ tr:nth-child(even) {
         </style>
     </head>
     <body>
-        <div class=""topnav">
+        <div class="topnav">
             Greetings <%=request.getAttribute("username")%>
             
         </div>
@@ -126,8 +126,7 @@ tr:nth-child(even) {
             </div>    
             <div style="padding-left:16px">
                 <p></p>
-                <form action="FrontEnd" method="post">
-                    <input type="hidden" name="pageName" value="book"/>
+                <div>
                     <table>
                         <tr><th></th><th>ID</th><th>Service Name</th><th>Book</th></tr>
                         <% AppointmentsXML appointments = (AppointmentsXML) request.getAttribute("appointmentResults");
@@ -135,8 +134,13 @@ tr:nth-child(even) {
                             int i=0;
                             for(Appointment appointment : appointments.getAppointments()){
                                 i++;%><tr><td><%=i%></td><td><%=appointment.getId()%></td><td><%=appointment.getServiceName()%></td>
-                            <td><% if(appointment.booking()){%>
-                                <input type ="submit" value ="Book"><% } else {System.out.println("Currently Not Avialable");}%></td>
+                            <td><% if(!appointment.booking()){%>
+                                <form action="FrontEnd" method="post">
+                                  <input type="hidden" name="pageName" value="book">
+                                  <button type="submit" name="code" value="<%=appointment.getId()%>">Book</button>
+                                </form>
+                                <% } else { %>Booked<% } %></td>
+                            <% } else {System.out.println("Currently Not Avialable");}%></td>
                             <% }
 }
                         
@@ -144,7 +148,7 @@ tr:nth-child(even) {
                             
                         
                     </table>
-                </form>
+                </div>
             </div>
         
             
